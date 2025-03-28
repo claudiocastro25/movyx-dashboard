@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/movyx-dashboard/static/css/main.729e60c8.css",
+    "main.js": "/movyx-dashboard/static/js/main.6e0cb291.js",
+    "static/js/453.dbe83ace.chunk.js": "/movyx-dashboard/static/js/453.dbe83ace.chunk.js",
+    "index.html": "/movyx-dashboard/index.html",
+    "main.729e60c8.css.map": "/movyx-dashboard/static/css/main.729e60c8.css.map",
+    "main.6e0cb291.js.map": "/movyx-dashboard/static/js/main.6e0cb291.js.map",
+    "453.dbe83ace.chunk.js.map": "/movyx-dashboard/static/js/453.dbe83ace.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.729e60c8.css",
+    "static/js/main.6e0cb291.js"
+  ]
+}
