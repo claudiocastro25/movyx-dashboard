@@ -1,8 +1,90 @@
 import React, { useState } from 'react';
-import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell, RadialBarChart, RadialBar } from 'recharts';
+
+// Estilos inline para casos onde o Tailwind não carregar
+const styles = {
+  container: {
+    padding: '1rem',
+    backgroundColor: '#f3f4f6',
+    width: '100%',
+  },
+  card: {
+    backgroundColor: 'white',
+    padding: '1.5rem',
+    borderRadius: '0.5rem',
+    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+    marginBottom: '1.5rem',
+  },
+  header: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: '1rem',
+  },
+  title: {
+    fontSize: '1.875rem',
+    fontWeight: 'bold',
+    marginBottom: '0.5rem',
+    color: '#1f2937',
+  },
+  subtitle: {
+    fontSize: '1.25rem',
+    color: '#4b5563',
+  },
+  button: {
+    padding: '0.5rem 1rem',
+    borderRadius: '0.375rem',
+    fontWeight: 'bold',
+    color: 'white',
+    border: 'none',
+    cursor: 'pointer',
+  },
+  section: {
+    marginBottom: '2rem',
+  },
+  sectionTitle: {
+    fontSize: '1.5rem',
+    fontWeight: 'bold',
+    marginBottom: '1rem',
+  },
+  grid: {
+    display: 'grid',
+    gap: '1rem',
+  },
+  table: {
+    minWidth: '100%',
+    backgroundColor: 'white',
+    border: '1px solid #e5e7eb',
+  },
+  tableHeader: {
+    backgroundColor: '#f9fafb',
+  },
+  tableHeaderCell: {
+    padding: '0.5rem 1rem',
+    borderBottom: '1px solid #e5e7eb',
+    textAlign: 'left',
+  },
+  tableCell: {
+    padding: '0.5rem 1rem',
+    borderBottom: '1px solid #e5e7eb',
+  },
+  greenText: {
+    color: '#10b981',
+    fontWeight: 'bold',
+  },
+  redText: {
+    color: '#ef4444',
+    fontWeight: 'bold',
+  },
+  highlight: {
+    backgroundColor: '#eff6ff',
+    border: '2px solid #3b82f6',
+  }
+};
 
 const SalesDashboard = () => {
   const [includeSaoJose, setIncludeSaoJose] = useState(true);
+  const [activeTab, setActiveTab] = useState('vendas'); // 'vendas' ou 'retencoes'
   
   // Monthly branch office data (filiais)
   const branchMonthlyData = {
@@ -153,6 +235,26 @@ const SalesDashboard = () => {
     { month: 'JAN → FEV', growth: ((1184298.80 - 825240.26) / 825240.26 * 100).toFixed(2) },
   ];
 
+  // Retention data
+  const retentionData = {
+    summary: {
+      totalPedidos: 295,
+      totalRetencoes: 62,
+      cancelamentos: 233,
+      taxaRetencao: 21.0,
+      valorRetido: 336191.50,
+      totalPlacas: 1021,
+      mediaPlacas: 16.5,
+      valorMedio: 5422.44
+    },
+    monthly: [
+      { month: 'Outubro/24', pedidos: 12, retencoes: 4, cancelamentos: 8, placas: 65, valorRetido: 4514.76, taxaRetencao: 33.3 },
+      { month: 'Novembro/24', pedidos: 85, retencoes: 12, cancelamentos: 73, placas: 330, valorRetido: 32178.27, taxaRetencao: 14.1 },
+      { month: 'Dezembro/24', pedidos: 75, retencoes: 15, cancelamentos: 60, placas: 231, valorRetido: 54781.23, taxaRetencao: 20.0 },
+      { month: 'Janeiro/25', pedidos: 123, retencoes: 31, cancelamentos: 92, placas: 395, valorRetido: 244717.24, taxaRetencao: 25.2 }
+    ]
+  };
+
   // Filter data based on the selected view
   const filterData = (data) => {
     if (includeSaoJose) return data;
@@ -198,58 +300,96 @@ const SalesDashboard = () => {
   };
 
   return (
-    <div className="p-4 bg-gray-100 w-full">
-      <div className="bg-white p-6 rounded-lg shadow-lg mb-6">
-        <div className="flex justify-between items-center mb-4">
+    <div style={styles.container} className="p-4 bg-gray-100 w-full">
+      <div style={styles.card} className="bg-white p-6 rounded-lg shadow-lg mb-6">
+        <div style={styles.header} className="flex justify-between items-center mb-4">
           <div>
-            <h1 className="text-3xl font-bold mb-2 text-gray-800">Movyx Sales Dashboard</h1>
-            <h2 className="text-xl text-gray-600">Outubro 2024 - Fevereiro 2025</h2>
+            <h1 style={styles.title} className="text-3xl font-bold mb-2 text-gray-800">Movyx Dashboard</h1>
+            <h2 style={styles.subtitle} className="text-xl text-gray-600">Outubro 2024 - Fevereiro 2025</h2>
           </div>
           <div className="flex items-center">
-            <button 
-              onClick={() => setIncludeSaoJose(!includeSaoJose)}
-              className="px-4 py-2 rounded font-bold" 
-              style={{ 
-                backgroundColor: includeSaoJose ? '#4CAF50' : '#F44336', 
-                color: 'white',
-                border: 'none',
-                cursor: 'pointer'
-              }}
-            >
-              {includeSaoJose ? '✓ São José dos Campos Incluído' : '✗ São José dos Campos Excluído'}
-            </button>
+            {activeTab === 'vendas' && (
+              <button 
+                onClick={() => setIncludeSaoJose(!includeSaoJose)}
+                style={{
+                  ...styles.button,
+                  backgroundColor: includeSaoJose ? '#4CAF50' : '#F44336', 
+                }} 
+                className="px-4 py-2 rounded font-bold mr-4"
+              >
+                {includeSaoJose ? '✓ São José dos Campos Incluído' : '✗ São José dos Campos Excluído'}
+              </button>
+            )}
           </div>
         </div>
         
+        {/* Tabs */}
+        <div style={{display: 'flex', borderBottom: '1px solid #e5e7eb', marginBottom: '1.5rem'}} className="flex border-b mb-6">
+          <button 
+            onClick={() => setActiveTab('vendas')}
+            style={{
+              padding: '0.75rem 1.5rem',
+              fontWeight: 'bold',
+              borderBottom: activeTab === 'vendas' ? '2px solid #4CAF50' : 'none',
+              color: activeTab === 'vendas' ? '#4CAF50' : '#6b7280',
+            }}
+            className="py-3 px-6 font-bold border-b-2 focus:outline-none"
+          >
+            Vendas
+          </button>
+          <button 
+            onClick={() => setActiveTab('retencoes')}
+            style={{
+              padding: '0.75rem 1.5rem',
+              fontWeight: 'bold',
+              borderBottom: activeTab === 'retencoes' ? '2px solid #4CAF50' : 'none',
+              color: activeTab === 'retencoes' ? '#4CAF50' : '#6b7280',
+            }}
+            className="py-3 px-6 font-bold border-b-2 focus:outline-none"
+          >
+            Retenções
+          </button>
+        </div>
+        
+        {activeTab === 'vendas' ? (
+        <>
         {/* Monthly Performance Cards - Side by Side */}
-        <div className="mb-8">
-          <h2 className="text-2xl font-bold mb-4">Desempenho Mensal</h2>
-          <div className="grid grid-cols-5 gap-4">
+        <div style={styles.section} className="mb-8">
+          <h2 style={styles.sectionTitle} className="text-2xl font-bold mb-4">Desempenho Mensal</h2>
+          <div style={{...styles.grid, gridTemplateColumns: 'repeat(5, 1fr)'}} className="grid grid-cols-5 gap-4">
             {monthlyTotals.map((month, index) => (
-              <div key={index} className={`p-4 rounded-lg shadow ${month.month === 'FEV/25' ? 'bg-blue-50 border-2 border-blue-500' : 'bg-gray-50'}`}>
-                <h3 className="text-lg font-semibold">{month.month}</h3>
-                <div className="flex justify-between items-center mt-2">
-                  <span className="text-gray-600">Resultado:</span>
-                  <span className="text-xl font-bold">R$ {month.resultado.toLocaleString('pt-BR')}</span>
+              <div 
+                key={index} 
+                style={{
+                  ...styles.card, 
+                  padding: '1rem', 
+                  ...(month.month === 'FEV/25' ? styles.highlight : {backgroundColor: '#f9fafb'})
+                }}
+                className={`p-4 rounded-lg shadow ${month.month === 'FEV/25' ? 'bg-blue-50 border-2 border-blue-500' : 'bg-gray-50'}`}
+              >
+                <h3 style={{fontWeight: 'bold', fontSize: '1.125rem'}} className="text-lg font-semibold">{month.month}</h3>
+                <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.5rem'}} className="flex justify-between items-center mt-2">
+                  <span style={{color: '#4b5563'}} className="text-gray-600">Resultado:</span>
+                  <span style={{fontWeight: 'bold', fontSize: '1.25rem'}} className="text-xl font-bold">R$ {month.resultado.toLocaleString('pt-BR')}</span>
                 </div>
-                <div className="flex justify-between items-center mt-2">
-                  <span className="text-gray-600">Meta:</span>
+                <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.5rem'}} className="flex justify-between items-center mt-2">
+                  <span style={{color: '#4b5563'}} className="text-gray-600">Meta:</span>
                   <span>R$ {month.meta.toLocaleString('pt-BR')}</span>
                 </div>
-                <div className="flex justify-between items-center mt-2">
-                  <span className="text-gray-600">% Meta:</span>
-                  <span className={`font-semibold ${month.percentual >= 100 ? 'text-green-600' : 'text-red-600'}`}>
+                <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.5rem'}} className="flex justify-between items-center mt-2">
+                  <span style={{color: '#4b5563'}} className="text-gray-600">% Meta:</span>
+                  <span style={month.percentual >= 100 ? styles.greenText : styles.redText} className={`font-semibold ${month.percentual >= 100 ? 'text-green-600' : 'text-red-600'}`}>
                     {month.percentual}%
                   </span>
                 </div>
-                <div className="flex justify-between items-center mt-2">
-                  <span className="text-gray-600">Crescimento:</span>
-                  <span className={`font-semibold ${month.crescimento >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.5rem'}} className="flex justify-between items-center mt-2">
+                  <span style={{color: '#4b5563'}} className="text-gray-600">Crescimento:</span>
+                  <span style={month.crescimento >= 0 ? styles.greenText : styles.redText} className={`font-semibold ${month.crescimento >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                     {month.crescimento}%
                   </span>
                 </div>
                 {month.month === 'FEV/25' && (
-                  <div className="mt-2 py-1 px-2 bg-blue-100 rounded text-blue-800 text-center font-semibold">
+                  <div style={{marginTop: '0.5rem', padding: '0.25rem 0.5rem', backgroundColor: '#dbeafe', borderRadius: '0.25rem', textAlign: 'center', fontWeight: 'bold', color: '#1e40af'}} className="mt-2 py-1 px-2 bg-blue-100 rounded text-blue-800 text-center font-semibold">
                     Destaque: +43% de crescimento!
                   </div>
                 )}
@@ -259,93 +399,117 @@ const SalesDashboard = () => {
         </div>
 
         {/* Crescimento Entre Mês Atual e Anterior */}
-        <div className="mb-8">
-          <h2 className="text-2xl font-bold mb-4">Comparação de Crescimento Entre Meses</h2>
-          <div className="grid grid-cols-4 gap-4 mb-4">
+        <div style={styles.section} className="mb-8">
+          <h2 style={styles.sectionTitle} className="text-2xl font-bold mb-4">Comparação de Crescimento Entre Meses</h2>
+          <div style={{...styles.grid, gridTemplateColumns: 'repeat(4, 1fr)', marginBottom: '1rem'}} className="grid grid-cols-4 gap-4 mb-4">
             {monthlyGrowthData.map((item, index) => (
-              <div key={index} className={`p-4 rounded-lg shadow ${index === 3 ? 'bg-blue-50 border-2 border-blue-500' : 'bg-gray-50'}`}>
-                <h4 className="text-lg font-semibold">{item.month}</h4>
-                <div className={`text-3xl font-bold mt-2 ${parseFloat(item.growth) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+              <div 
+                key={index} 
+                style={{
+                  ...styles.card, 
+                  padding: '1rem', 
+                  ...(index === 3 ? styles.highlight : {backgroundColor: '#f9fafb'})
+                }}
+                className={`p-4 rounded-lg shadow ${index === 3 ? 'bg-blue-50 border-2 border-blue-500' : 'bg-gray-50'}`}
+              >
+                <h4 style={{fontWeight: 'bold', fontSize: '1.125rem'}} className="text-lg font-semibold">{item.month}</h4>
+                <div 
+                  style={{
+                    fontSize: '1.875rem', 
+                    fontWeight: 'bold', 
+                    marginTop: '0.5rem',
+                    color: parseFloat(item.growth) >= 0 ? '#10b981' : '#ef4444'
+                  }} 
+                  className={`text-3xl font-bold mt-2 ${parseFloat(item.growth) >= 0 ? 'text-green-600' : 'text-red-600'}`}
+                >
                   {item.growth}%
                 </div>
                 {index === 3 && (
-                  <div className="mt-2 py-1 px-2 bg-blue-100 rounded text-blue-800 text-center font-semibold">
+                  <div style={{marginTop: '0.5rem', padding: '0.25rem 0.5rem', backgroundColor: '#dbeafe', borderRadius: '0.25rem', textAlign: 'center', fontWeight: 'bold', color: '#1e40af'}} className="mt-2 py-1 px-2 bg-blue-100 rounded text-blue-800 text-center font-semibold">
                     Maior crescimento do período!
                   </div>
                 )}
               </div>
             ))}
           </div>
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={monthlyGrowthData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="month" />
-              <YAxis />
-              <Tooltip formatter={(value) => `${value}%`} />
-              <Bar dataKey="growth" name="Crescimento (%)" radius={[4, 4, 0, 0]}>
-                {monthlyGrowthData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={parseFloat(entry.growth) >= 0 ? '#4CAF50' : '#F44336'} />
-                ))}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
+          <div style={{height: '300px'}}>
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={monthlyGrowthData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="month" />
+                <YAxis />
+                <Tooltip formatter={(value) => `${value}%`} />
+                <Bar dataKey="growth" name="Crescimento (%)" radius={[4, 4, 0, 0]}>
+                  {monthlyGrowthData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={parseFloat(entry.growth) >= 0 ? '#4CAF50' : '#F44336'} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
         </div>
 
         {/* Crescimento Outubro a Fevereiro */}
-        <div className="mb-8">
-          <h2 className="text-2xl font-bold mb-4">Crescimento de Outubro até Fevereiro</h2>
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={filteredOctToFebGrowth}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="filial" />
-              <YAxis />
-              <Tooltip formatter={(value) => typeof value === "string" ? value : `${value}%`} />
-              <Legend />
-              <Bar dataKey="growth" name="Crescimento Outubro → Fevereiro (%)">
-                {filteredOctToFebGrowth.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.growth === "Novo" ? '#9C27B0' : (parseFloat(entry.growth) >= 0 ? '#4CAF50' : '#F44336')} />
-                ))}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
+        <div style={styles.section} className="mb-8">
+          <h2 style={styles.sectionTitle} className="text-2xl font-bold mb-4">Crescimento de Outubro até Fevereiro</h2>
+          <div style={{height: '300px'}}>
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={filteredOctToFebGrowth}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="filial" />
+                <YAxis />
+                <Tooltip formatter={(value) => typeof value === "string" ? value : `${value}%`} />
+                <Legend />
+                <Bar dataKey="growth" name="Crescimento Outubro → Fevereiro (%)">
+                  {filteredOctToFebGrowth.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.growth === "Novo" ? '#9C27B0' : (parseFloat(entry.growth) >= 0 ? '#4CAF50' : '#F44336')} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
         </div>
 
         {/* Evolução de Vendas */}
-        <div className="bg-white p-4 rounded-lg shadow-md mb-6">
-          <h2 className="text-xl font-bold mb-4">Evolução de Vendas por Mês</h2>
-          <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={monthlyTotals}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="month" />
-              <YAxis />
-              <Tooltip formatter={(value) => `R$ ${value.toLocaleString('pt-BR')}`} />
-              <Legend />
-              <Line type="monotone" dataKey="meta" stroke="#8884d8" name="Meta" />
-              <Line type="monotone" dataKey="resultado" stroke="#82ca9d" name="Resultado" activeDot={{ r: 8 }} />
-            </LineChart>
-          </ResponsiveContainer>
+        <div style={{...styles.card, marginBottom: '1.5rem'}} className="bg-white p-4 rounded-lg shadow-md mb-6">
+          <h2 style={{fontSize: '1.25rem', fontWeight: 'bold', marginBottom: '1rem'}} className="text-xl font-bold mb-4">Evolução de Vendas por Mês</h2>
+          <div style={{height: '300px'}}>
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={monthlyTotals}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="month" />
+                <YAxis />
+                <Tooltip formatter={(value) => `R$ ${value.toLocaleString('pt-BR')}`} />
+                <Legend />
+                <Line type="monotone" dataKey="meta" stroke="#8884d8" name="Meta" />
+                <Line type="monotone" dataKey="resultado" stroke="#82ca9d" name="Resultado" activeDot={{ r: 8 }} />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
         </div>
 
         {/* Desempenho por Filial */}
-        <div className="mb-8">
-          <h2 className="text-2xl font-bold mb-4 flex items-center">
+        <div style={styles.section} className="mb-8">
+          <h2 style={{...styles.sectionTitle, display: 'flex', alignItems: 'center'}} className="text-2xl font-bold mb-4 flex items-center">
             Desempenho por Filial
             {!includeSaoJose && (
-              <span className="ml-3 text-sm font-normal text-gray-500">(São José dos Campos excluído)</span>
+              <span style={{marginLeft: '0.75rem', fontSize: '0.875rem', fontWeight: 'normal', color: '#6b7280'}} className="ml-3 text-sm font-normal text-gray-500">
+                (São José dos Campos excluído)
+              </span>
             )}
           </h2>
           
-          <div className="mb-6">
-            <h3 className="text-lg font-semibold mb-3">Top 5 Filiais - Fevereiro 2025</h3>
-            <div className="overflow-x-auto">
-              <table className="min-w-full bg-white border border-gray-200">
+          <div style={{marginBottom: '1.5rem'}}>
+            <h3 style={{fontSize: '1.125rem', fontWeight: 'bold', marginBottom: '0.75rem'}} className="text-lg font-semibold mb-3">Top 5 Filiais - Fevereiro 2025</h3>
+            <div style={{overflowX: 'auto'}}>
+              <table style={styles.table} className="min-w-full bg-white border border-gray-200">
                 <thead>
-                  <tr className="bg-gray-100">
-                    <th className="py-2 px-4 border-b">Filial</th>
-                    <th className="py-2 px-4 border-b">Meta</th>
-                    <th className="py-2 px-4 border-b">Resultado</th>
-                    <th className="py-2 px-4 border-b">% Meta</th>
-                    <th className="py-2 px-4 border-b">Crescimento</th>
+                  <tr style={styles.tableHeader}>
+                    <th style={styles.tableHeaderCell}>Filial</th>
+                    <th style={styles.tableHeaderCell}>Meta</th>
+                    <th style={styles.tableHeaderCell}>Resultado</th>
+                    <th style={styles.tableHeaderCell}>% Meta</th>
+                    <th style={styles.tableHeaderCell}>Crescimento</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -353,16 +517,23 @@ const SalesDashboard = () => {
                     .sort((a, b) => b.percentual - a.percentual)
                     .slice(0, 5)
                     .map((branch, index) => (
-                      <tr key={index} className={index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}>
-                        <td className="py-2 px-4 border-b">{branch.filial}</td>
-                        <td className="py-2 px-4 border-b">R$ {branch.meta.toLocaleString('pt-BR')}</td>
-                        <td className="py-2 px-4 border-b">R$ {branch.resultado.toLocaleString('pt-BR')}</td>
-                        <td className={`py-2 px-4 border-b font-semibold ${branch.percentual >= 100 ? 'text-green-600' : 'text-red-600'}`}>
+                      <tr key={index} style={{backgroundColor: index % 2 === 0 ? '#f9fafb' : 'white'}}>
+                        <td style={styles.tableCell}>{branch.filial}</td>
+                        <td style={styles.tableCell}>R$ {branch.meta.toLocaleString('pt-BR')}</td>
+                        <td style={styles.tableCell}>R$ {branch.resultado.toLocaleString('pt-BR')}</td>
+                        <td style={{
+                          ...styles.tableCell, 
+                          fontWeight: 'bold',
+                          color: branch.percentual >= 100 ? '#10b981' : '#ef4444'
+                        }}>
                           {branch.percentual}%
                         </td>
-                        <td className="py-2 px-4 border-b">
+                        <td style={styles.tableCell}>
                           {branch.crescimento !== null ? (
-                            <span className={`font-bold ${branch.crescimento >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                            <span style={{
+                              fontWeight: 'bold',
+                              color: branch.crescimento >= 0 ? '#10b981' : '#ef4444'
+                            }}>
                               {branch.crescimento}%
                             </span>
                           ) : 'N/A'}
@@ -374,107 +545,131 @@ const SalesDashboard = () => {
             </div>
           </div>
 
-          <div className="mb-6">
-            <h3 className="text-lg font-semibold mb-3">Evolução das Principais Filiais</h3>
-            <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={filteredTrends}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="month" />
-                <YAxis />
-                <Tooltip formatter={(value) => `R$ ${value.toLocaleString('pt-BR')}`} />
-                <Legend />
-                <Line type="monotone" dataKey="BELO HORIZONTE" stroke="#8884d8" />
-                <Line type="monotone" dataKey="RIO DE JANEIRO" stroke="#82ca9d" />
-                <Line type="monotone" dataKey="RIO GRANDE DO SUL" stroke="#ffc658" />
-                <Line type="monotone" dataKey="PARANAVAÍ" stroke="#ff8042" />
-                <Line type="monotone" dataKey="LONDRINA" stroke="#0088fe" />
-                {includeSaoJose && <Line type="monotone" dataKey="SÃO JOSÉ DOS CAMPOS" stroke="#00C49F" strokeWidth={3} />}
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-            <div>
-              <h3 className="text-lg font-semibold mb-3">Crescimento por Filial - Fevereiro 2025</h3>
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={filteredFebGrowth}>
+          <div style={{marginBottom: '1.5rem'}}>
+            <h3 style={{fontSize: '1.125rem', fontWeight: 'bold', marginBottom: '0.75rem'}} className="text-lg font-semibold mb-3">Evolução das Principais Filiais</h3>
+            <div style={{height: '300px'}}>
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={filteredTrends}>
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="filial" />
+                  <XAxis dataKey="month" />
                   <YAxis />
-                  <Tooltip formatter={(value) => `${value}%`} />
-                  <Bar dataKey="value" name="Crescimento (%)">
-                    {filteredFebGrowth.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={greenRed(entry.value)} />
-                    ))}
-                  </Bar>
-                </BarChart>
+                  <Tooltip formatter={(value) => `R$ ${value.toLocaleString('pt-BR')}`} />
+                  <Legend />
+                  <Line type="monotone" dataKey="BELO HORIZONTE" stroke="#8884d8" />
+                  <Line type="monotone" dataKey="RIO DE JANEIRO" stroke="#82ca9d" />
+                  <Line type="monotone" dataKey="RIO GRANDE DO SUL" stroke="#ffc658" />
+                  <Line type="monotone" dataKey="PARANAVAÍ" stroke="#ff8042" />
+                  <Line type="monotone" dataKey="LONDRINA" stroke="#0088fe" />
+                  {includeSaoJose && <Line type="monotone" dataKey="SÃO JOSÉ DOS CAMPOS" stroke="#00C49F" strokeWidth={3} />}
+                </LineChart>
               </ResponsiveContainer>
             </div>
+          </div>
+
+          <div style={{
+            display: 'grid', 
+            gridTemplateColumns: '1fr', 
+            gap: '1.5rem', 
+            marginBottom: '1.5rem'
+          }} className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
             <div>
-              <h3 className="text-lg font-semibold mb-3">Distribuição de Vendas - Fevereiro 2025</h3>
-              <ResponsiveContainer width="100%" height={300}>
-                <PieChart>
-                  <Pie
-                    data={filteredBranchData.feb2025}
-                    dataKey="resultado"
-                    nameKey="filial"
-                    cx="50%"
-                    cy="50%"
-                    outerRadius={100}
-                    fill="#8884d8"
-                    label={(entry) => entry.filial}
-                  >
-                    {filteredBranchData.feb2025.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip formatter={(value) => `R$ ${value.toLocaleString('pt-BR')}`} />
-                </PieChart>
-              </ResponsiveContainer>
+              <h3 style={{fontSize: '1.125rem', fontWeight: 'bold', marginBottom: '0.75rem'}} className="text-lg font-semibold mb-3">Crescimento por Filial - Fevereiro 2025</h3>
+              <div style={{height: '300px'}}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={filteredFebGrowth}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="filial" />
+                    <YAxis />
+                    <Tooltip formatter={(value) => `${value}%`} />
+                    <Bar dataKey="value" name="Crescimento (%)">
+                      {filteredFebGrowth.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={greenRed(entry.value)} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+            <div>
+              <h3 style={{fontSize: '1.125rem', fontWeight: 'bold', marginBottom: '0.75rem'}} className="text-lg font-semibold mb-3">Distribuição de Vendas - Fevereiro 2025</h3>
+              <div style={{height: '300px'}}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={filteredBranchData.feb2025}
+                      dataKey="resultado"
+                      nameKey="filial"
+                      cx="50%"
+                      cy="50%"
+                      outerRadius={100}
+                      fill="#8884d8"
+                      label={(entry) => entry.filial}
+                    >
+                      {filteredBranchData.feb2025.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip formatter={(value) => `R$ ${value.toLocaleString('pt-BR')}`} />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
             </div>
           </div>
         </div>
 
         {/* Desempenho por Consultor */}
         <div>
-          <h2 className="text-2xl font-bold mb-4 flex items-center">
+          <h2 style={{...styles.sectionTitle, display: 'flex', alignItems: 'center'}} className="text-2xl font-bold mb-4 flex items-center">
             Desempenho por Consultor
             {!includeSaoJose && (
-              <span className="ml-3 text-sm font-normal text-gray-500">(São José dos Campos excluído)</span>
+              <span style={{marginLeft: '0.75rem', fontSize: '0.875rem', fontWeight: 'normal', color: '#6b7280'}} className="ml-3 text-sm font-normal text-gray-500">
+                (São José dos Campos excluído)
+              </span>
             )}
           </h2>
           
-          <div className="mb-6">
-            <h3 className="text-lg font-semibold mb-3">Top Consultores - Fevereiro 2025</h3>
-            <div className="overflow-x-auto">
-              <table className="min-w-full bg-white border border-gray-200">
+          <div style={{marginBottom: '1.5rem'}}>
+            <h3 style={{fontSize: '1.125rem', fontWeight: 'bold', marginBottom: '0.75rem'}} className="text-lg font-semibold mb-3">Top Consultores - Fevereiro 2025</h3>
+            <div style={{overflowX: 'auto'}}>
+              <table style={styles.table} className="min-w-full bg-white border border-gray-200">
                 <thead>
-                  <tr className="bg-gray-100">
-                    <th className="py-2 px-4 border-b">Tier</th>
-                    <th className="py-2 px-4 border-b">Consultor</th>
-                    <th className="py-2 px-4 border-b">Filial</th>
-                    <th className="py-2 px-4 border-b">Resultado</th>
-                    <th className="py-2 px-4 border-b">% Meta</th>
-                    <th className="py-2 px-4 border-b">Crescimento</th>
+                  <tr style={styles.tableHeader}>
+                    <th style={styles.tableHeaderCell}>Tier</th>
+                    <th style={styles.tableHeaderCell}>Consultor</th>
+                    <th style={styles.tableHeaderCell}>Filial</th>
+                    <th style={styles.tableHeaderCell}>Resultado</th>
+                    <th style={styles.tableHeaderCell}>% Meta</th>
+                    <th style={styles.tableHeaderCell}>Crescimento</th>
                   </tr>
                 </thead>
                 <tbody>
                   {filteredConsultantData.feb2025
                     .sort((a, b) => b.percentual - a.percentual)
                     .map((consultant, index) => (
-                      <tr key={index} className={index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}>
-                        <td className="py-2 px-4 border-b font-semibold" style={{ color: tierColors[consultant.tier] }}>
+                      <tr key={index} style={{backgroundColor: index % 2 === 0 ? '#f9fafb' : 'white'}}>
+                        <td style={{
+                          ...styles.tableCell, 
+                          fontWeight: 'bold',
+                          color: tierColors[consultant.tier]
+                        }}>
                           {consultant.tier}
                         </td>
-                        <td className="py-2 px-4 border-b">{consultant.consultor}</td>
-                        <td className="py-2 px-4 border-b">{consultant.filial}</td>
-                        <td className="py-2 px-4 border-b">R$ {consultant.resultado.toLocaleString('pt-BR')}</td>
-                        <td className={`py-2 px-4 border-b font-semibold ${consultant.percentual >= 100 ? 'text-green-600' : 'text-red-600'}`}>
+                        <td style={styles.tableCell}>{consultant.consultor}</td>
+                        <td style={styles.tableCell}>{consultant.filial}</td>
+                        <td style={styles.tableCell}>R$ {consultant.resultado.toLocaleString('pt-BR')}</td>
+                        <td style={{
+                          ...styles.tableCell, 
+                          fontWeight: 'bold',
+                          color: consultant.percentual >= 100 ? '#10b981' : '#ef4444'
+                        }}>
                           {consultant.percentual}%
                         </td>
-                        <td className="py-2 px-4 border-b">
+                        <td style={styles.tableCell}>
                           {consultant.crescimento !== null ? (
-                            <span className={`font-bold ${consultant.crescimento >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                            <span style={{
+                              fontWeight: 'bold',
+                              color: consultant.crescimento >= 0 ? '#10b981' : '#ef4444'
+                            }}>
                               {consultant.crescimento}%
                             </span>
                           ) : 'N/A'}
@@ -486,52 +681,231 @@ const SalesDashboard = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div style={{
+            display: 'grid', 
+            gridTemplateColumns: '1fr', 
+            gap: '1.5rem'
+          }} className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <h3 className="text-lg font-semibold mb-3">Desempenho por Tier de Consultor</h3>
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={topConsultants.filter(c => includeSaoJose || c.name !== 'LUCAS')}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" />
-                  <YAxis />
-                  <Tooltip formatter={(value) => `R$ ${value.toLocaleString('pt-BR')}`} />
-                  <Legend />
-                  <Bar dataKey="total" name="Total Vendas">
-                    {topConsultants.filter(c => includeSaoJose || c.name !== 'LUCAS').map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={tierColors[entry.tier]} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
+              <h3 style={{fontSize: '1.125rem', fontWeight: 'bold', marginBottom: '0.75rem'}} className="text-lg font-semibold mb-3">Desempenho por Tier de Consultor</h3>
+              <div style={{height: '300px'}}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={topConsultants.filter(c => includeSaoJose || c.name !== 'LUCAS')}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" />
+                    <YAxis />
+                    <Tooltip formatter={(value) => `R$ ${value.toLocaleString('pt-BR')}`} />
+                    <Legend />
+                    <Bar dataKey="total" name="Total Vendas">
+                      {topConsultants.filter(c => includeSaoJose || c.name !== 'LUCAS').map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={tierColors[entry.tier]} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
             </div>
             <div>
-              <h3 className="text-lg font-semibold mb-3">Comparativo Out/24 vs Fev/25</h3>
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart 
-                  data={filteredConsultantData.oct2024
-                    .filter(c => filteredConsultantData.feb2025.some(fc => fc.consultor === c.consultor))
-                    .map(c => {
-                      const feb = filteredConsultantData.feb2025.find(fc => fc.consultor === c.consultor);
-                      return {
-                        name: c.consultor,
-                        out: c.resultado,
-                        fev: feb ? feb.resultado : 0,
-                        tier: c.tier
-                      };
-                    })}
+              <h3 style={{fontSize: '1.125rem', fontWeight: 'bold', marginBottom: '0.75rem'}} className="text-lg font-semibold mb-3">Comparativo Out/24 vs Fev/25</h3>
+              <div style={{height: '300px'}}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart 
+                    data={filteredConsultantData.oct2024
+                      .filter(c => filteredConsultantData.feb2025.some(fc => fc.consultor === c.consultor))
+                      .map(c => {
+                        const feb = filteredConsultantData.feb2025.find(fc => fc.consultor === c.consultor);
+                        return {
+                          name: c.consultor,
+                          out: c.resultado,
+                          fev: feb ? feb.resultado : 0,
+                          tier: c.tier
+                        };
+                      })}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" />
+                    <YAxis />
+                    <Tooltip formatter={(value) => `R$ ${value.toLocaleString('pt-BR')}`} />
+                    <Legend />
+                    <Bar dataKey="out" name="Outubro 2024" fill="#8884d8" />
+                    <Bar dataKey="fev" name="Fevereiro 2025" fill="#82ca9d" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          </div>
+        </div>
+        </> 
+        ) : (
+        <>
+        {/* Retention Dashboard */}
+        <div style={styles.section} className="mb-8">
+          <h2 style={styles.sectionTitle} className="text-2xl font-bold mb-4">Dashboard de Análise de Retenções</h2>
+          
+          {/* Summary Cards */}
+          <div style={{...styles.grid, gridTemplateColumns: 'repeat(4, 1fr)'}} className="grid grid-cols-4 gap-4 mb-6">
+            <div style={{...styles.card, padding: '1rem', backgroundColor: '#f9fafb'}} className="p-4 rounded-lg shadow bg-gray-50">
+              <h3 style={{fontSize: '1rem', color: '#6b7280'}} className="text-base text-gray-500">Total de Pedidos</h3>
+              <div style={{fontSize: '1.5rem', fontWeight: 'bold'}} className="text-2xl font-bold">{retentionData.summary.totalPedidos}</div>
+            </div>
+            <div style={{...styles.card, padding: '1rem', backgroundColor: '#f9fafb'}} className="p-4 rounded-lg shadow bg-gray-50">
+              <h3 style={{fontSize: '1rem', color: '#6b7280'}} className="text-base text-gray-500">Total de Retenções</h3>
+              <div style={{fontSize: '1.5rem', fontWeight: 'bold'}} className="text-2xl font-bold">{retentionData.summary.totalRetencoes}</div>
+            </div>
+            <div style={{...styles.card, padding: '1rem', backgroundColor: '#f9fafb'}} className="p-4 rounded-lg shadow bg-gray-50">
+              <h3 style={{fontSize: '1rem', color: '#6b7280'}} className="text-base text-gray-500">Cancelamentos</h3>
+              <div style={{fontSize: '1.5rem', fontWeight: 'bold'}} className="text-2xl font-bold">{retentionData.summary.cancelamentos}</div>
+            </div>
+            <div style={{...styles.card, padding: '1rem', backgroundColor: '#f0fdf4'}} className="p-4 rounded-lg shadow bg-green-50">
+              <h3 style={{fontSize: '1rem', color: '#6b7280'}} className="text-base text-gray-500">Taxa de Retenção</h3>
+              <div style={{fontSize: '1.5rem', fontWeight: 'bold', color: '#4CAF50'}} className="text-2xl font-bold text-green-600">{retentionData.summary.taxaRetencao}%</div>
+            </div>
+          </div>
+          
+          {/* Value Cards */}
+          <div style={{...styles.grid, gridTemplateColumns: 'repeat(4, 1fr)'}} className="grid grid-cols-4 gap-4 mb-6">
+            <div style={{...styles.card, padding: '1rem', backgroundColor: '#f0f9ff'}} className="p-4 rounded-lg shadow bg-blue-50">
+              <h3 style={{fontSize: '1rem', color: '#6b7280'}} className="text-base text-gray-500">Valor Total Retido</h3>
+              <div style={{fontSize: '1.5rem', fontWeight: 'bold', color: '#3b82f6'}} className="text-2xl font-bold text-blue-600">
+                R$ {retentionData.summary.valorRetido.toLocaleString('pt-BR', {minimumFractionDigits: 2})}
+              </div>
+            </div>
+            <div style={{...styles.card, padding: '1rem', backgroundColor: '#f9fafb'}} className="p-4 rounded-lg shadow bg-gray-50">
+              <h3 style={{fontSize: '1rem', color: '#6b7280'}} className="text-base text-gray-500">Total de Placas</h3>
+              <div style={{fontSize: '1.5rem', fontWeight: 'bold'}} className="text-2xl font-bold">{retentionData.summary.totalPlacas}</div>
+            </div>
+            <div style={{...styles.card, padding: '1rem', backgroundColor: '#f9fafb'}} className="p-4 rounded-lg shadow bg-gray-50">
+              <h3 style={{fontSize: '1rem', color: '#6b7280'}} className="text-base text-gray-500">Média Placas/Retenção</h3>
+              <div style={{fontSize: '1.5rem', fontWeight: 'bold'}} className="text-2xl font-bold">{retentionData.summary.mediaPlacas}</div>
+            </div>
+            <div style={{...styles.card, padding: '1rem', backgroundColor: '#f0f9ff'}} className="p-4 rounded-lg shadow bg-blue-50">
+              <h3 style={{fontSize: '1rem', color: '#6b7280'}} className="text-base text-gray-500">Valor Médio/Retenção</h3>
+              <div style={{fontSize: '1.5rem', fontWeight: 'bold', color: '#3b82f6'}} className="text-2xl font-bold text-blue-600">
+                R$ {retentionData.summary.valorMedio.toLocaleString('pt-BR', {minimumFractionDigits: 2})}
+              </div>
+            </div>
+          </div>
+          
+          {/* Evolução Mensal */}
+          <div style={{marginBottom: '2rem'}}>
+            <h3 style={{fontSize: '1.125rem', fontWeight: 'bold', marginBottom: '0.75rem'}} className="text-lg font-semibold mb-3">Evolução Mensal</h3>
+            <div style={{height: '300px'}}>
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={retentionData.monthly}
+                  margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
                 >
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" />
-                  <YAxis />
-                  <Tooltip formatter={(value) => `R$ ${value.toLocaleString('pt-BR')}`} />
+                  <XAxis dataKey="month" />
+                  <YAxis yAxisId="left" orientation="left" />
+                  <YAxis yAxisId="right" orientation="right" />
+                  <Tooltip formatter={(value, name) => {
+                    if (name === 'taxaRetencao') return [`${value}%`, 'Taxa de Retenção'];
+                    return [value, name === 'pedidos' ? 'Pedidos' : name === 'retencoes' ? 'Retenções' : name];
+                  }} />
                   <Legend />
-                  <Bar dataKey="out" name="Outubro 2024" fill="#8884d8" />
-                  <Bar dataKey="fev" name="Fevereiro 2025" fill="#82ca9d" />
+                  <Bar yAxisId="left" dataKey="pedidos" fill="#8884d8" name="Pedidos" />
+                  <Bar yAxisId="left" dataKey="retencoes" fill="#82ca9d" name="Retenções" />
+                  <Line yAxisId="right" type="monotone" dataKey="taxaRetencao" stroke="#ff7300" name="Taxa de Retenção (%)" />
                 </BarChart>
               </ResponsiveContainer>
             </div>
           </div>
+          
+          {/* Detalhamento Mensal */}
+          <div style={{marginBottom: '2rem'}}>
+            <h3 style={{fontSize: '1.125rem', fontWeight: 'bold', marginBottom: '0.75rem'}} className="text-lg font-semibold mb-3">Detalhamento Mensal</h3>
+            <div style={{overflowX: 'auto'}}>
+              <table style={styles.table} className="min-w-full bg-white border border-gray-200">
+                <thead>
+                  <tr style={styles.tableHeader}>
+                    <th style={styles.tableHeaderCell}>Mês</th>
+                    <th style={styles.tableHeaderCell}>Pedidos</th>
+                    <th style={styles.tableHeaderCell}>Retenções</th>
+                    <th style={styles.tableHeaderCell}>Cancelamentos</th>
+                    <th style={styles.tableHeaderCell}>Placas</th>
+                    <th style={styles.tableHeaderCell}>Valor Retido</th>
+                    <th style={styles.tableHeaderCell}>Taxa Retenção</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {retentionData.monthly.map((month, index) => (
+                    <tr key={index} style={{backgroundColor: index % 2 === 0 ? '#f9fafb' : 'white'}}>
+                      <td style={styles.tableCell}>{month.month}</td>
+                      <td style={styles.tableCell}>{month.pedidos}</td>
+                      <td style={styles.tableCell}>{month.retencoes}</td>
+                      <td style={styles.tableCell}>{month.cancelamentos}</td>
+                      <td style={styles.tableCell}>{month.placas}</td>
+                      <td style={styles.tableCell}>R$ {month.valorRetido.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                      <td style={{...styles.tableCell, fontWeight: 'bold', color: '#4CAF50'}}>{month.taxaRetencao}%</td>
+                    </tr>
+                  ))}
+                  <tr style={{backgroundColor: '#f0fdf4', fontWeight: 'bold'}}>
+                    <td style={styles.tableCell}>Total/Média</td>
+                    <td style={styles.tableCell}>{retentionData.summary.totalPedidos}</td>
+                    <td style={styles.tableCell}>{retentionData.summary.totalRetencoes}</td>
+                    <td style={styles.tableCell}>{retentionData.summary.cancelamentos}</td>
+                    <td style={styles.tableCell}>{retentionData.summary.totalPlacas}</td>
+                    <td style={styles.tableCell}>R$ {retentionData.summary.valorRetido.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                    <td style={{...styles.tableCell, fontWeight: 'bold', color: '#4CAF50'}}>{retentionData.summary.taxaRetencao}%</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          
+          {/* Crescimento da Taxa de Retenção */}
+          <div style={{marginBottom: '2rem'}}>
+            <h3 style={{fontSize: '1.125rem', fontWeight: 'bold', marginBottom: '0.75rem'}} className="text-lg font-semibold mb-3">Crescimento da Taxa de Retenção</h3>
+            <div style={{height: '300px'}}>
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={retentionData.monthly}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="month" />
+                  <YAxis />
+                  <Tooltip formatter={(value) => `${value}%`} />
+                  <Legend />
+                  <Line type="monotone" dataKey="taxaRetencao" stroke="#4CAF50" name="Taxa de Retenção %" activeDot={{ r: 8 }} strokeWidth={2} />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+          
+          {/* Análise de Valor Retido */}
+          <div style={{marginBottom: '2rem'}}>
+            <h3 style={{fontSize: '1.125rem', fontWeight: 'bold', marginBottom: '0.75rem'}} className="text-lg font-semibold mb-3">Análise de Valor Retido</h3>
+            <div style={{height: '300px'}}>
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={retentionData.monthly}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="month" />
+                  <YAxis />
+                  <Tooltip formatter={(value) => `R$ ${value.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`} />
+                  <Legend />
+                  <Bar dataKey="valorRetido" fill="#3b82f6" name="Valor Retido (R$)" />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+          
+          {/* Taxa de Crescimento */}
+          <div style={styles.section}>
+            <h3 style={{fontSize: '1.125rem', fontWeight: 'bold', marginBottom: '0.75rem'}} className="text-lg font-semibold mb-3">Destaque - Crescimento da Taxa de Retenção</h3>
+            <div style={{...styles.card, padding: '1.5rem', backgroundColor: '#f0fdf4'}} className="p-6 rounded-lg shadow bg-green-50 text-center">
+              <div style={{color: '#4CAF50', fontSize: '1.25rem', fontWeight: 'bold', marginBottom: '0.5rem'}} className="text-xl font-bold text-green-600 mb-2">
+                Aumento de 78,7% na Taxa de Retenção
+              </div>
+              <div style={{fontSize: '1rem'}} className="text-base">
+                De <span style={{fontWeight: 'bold'}}>14,1%</span> em Novembro/24 para <span style={{fontWeight: 'bold'}}>25,2%</span> em Janeiro/25
+              </div>
+              <div style={{fontSize: '0.875rem', color: '#6b7280', marginTop: '0.5rem'}} className="text-sm text-gray-500 mt-2">
+                Resultado do trabalho estratégico realizado em parceria com a equipe da Carolina.
+              </div>
+            </div>
+          </div>
         </div>
+        </>
+        )}
       </div>
     </div>
   );
